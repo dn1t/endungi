@@ -23,10 +23,15 @@ const User: React.FC = () => {
     fetch(`/api/user/getUserInfo/${params.username}`)
       .then((res) => res.json())
       .then((getUserInfo: Result<UserInfo>) => {
-        if (!getUserInfo.success)
+        if (!getUserInfo.success) {
+          if (getUserInfo.error === 'notfound') {
+            alert('존재하지 않는 유저입니다.');
+            return (location.href = '/');
+          }
           return alert(
             `${getUserInfo.error.name}: ${getUserInfo.error.message}`
           );
+        }
         setUserInfo(getUserInfo.data);
 
         if (!getUserInfo.data.profileImage) return;
