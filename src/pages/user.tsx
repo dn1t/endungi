@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import Skeleton from 'react-loading-skeleton';
 import { useParams } from 'react-router-dom';
@@ -38,7 +38,9 @@ const User: React.FC = () => {
         if (getUserInfo.data.profileImage) {
           const profileImage = new Image();
           profileImage.onload = () => setProfileImageLoaded(true);
-          profileImage.src = getUserInfo.data.profileImage;
+          profileImage.src =
+            getUserInfo.data.profileImage ??
+            'https://playentry.org/img/DefaultCardUserThmb.svg';
         }
 
         const thumbnailImagesLoadedTmp = [false, false, false];
@@ -57,7 +59,15 @@ const User: React.FC = () => {
           thumbnailImage1.src = getUserInfo.data.projects.sort(
             (a, b) => Number(a.updated) - Number(b.updated)
           )[0]?.thumb;
-        } else thumbnailImagesLoadedTmp[0] = true;
+        } else {
+          thumbnailImagesLoadedTmp[0] = true;
+          if (
+            thumbnailImagesLoadedTmp[0] &&
+            thumbnailImagesLoadedTmp[1] &&
+            thumbnailImagesLoadedTmp[2]
+          )
+            setThumbnailImagesLoaded(true);
+        }
 
         if (
           getUserInfo.data.projects.filter((project) => project.ranked !== null)
@@ -76,7 +86,15 @@ const User: React.FC = () => {
           thumbnailImage2.src = getUserInfo.data.projects
             .filter((project) => project.ranked !== null)
             .sort((a, b) => Number(a.updated) - Number(b.updated))[0]?.thumb;
-        } else thumbnailImagesLoadedTmp[1] = true;
+        } else {
+          thumbnailImagesLoadedTmp[1] = true;
+          if (
+            thumbnailImagesLoadedTmp[0] &&
+            thumbnailImagesLoadedTmp[1] &&
+            thumbnailImagesLoadedTmp[2]
+          )
+            setThumbnailImagesLoaded(true);
+        }
 
         if (
           getUserInfo.data.projects.filter(
@@ -96,7 +114,15 @@ const User: React.FC = () => {
           thumbnailImage3.src = getUserInfo.data.projects
             .filter((project) => project.staffPicked !== null)
             .sort((a, b) => Number(a.updated) - Number(b.updated))[0]?.thumb;
-        } else thumbnailImagesLoadedTmp[2] = true;
+        } else {
+          thumbnailImagesLoadedTmp[2] = true;
+          if (
+            thumbnailImagesLoadedTmp[0] &&
+            thumbnailImagesLoadedTmp[1] &&
+            thumbnailImagesLoadedTmp[2]
+          )
+            setThumbnailImagesLoaded(true);
+        }
       })
       .catch((err) => {
         alert(`${err.name}: ${err.message}`);
@@ -131,7 +157,10 @@ const User: React.FC = () => {
                   <div
                     className='h-[4.5rem] w-[4.5rem] xs:h-24 xs:w-24 bg-center bg-cover bg-no-repeat rounded-full border border-slate-100 dark:border-slate-900 flex-shrink-0'
                     style={{
-                      backgroundImage: `url('${userInfo?.profileImage}')`,
+                      backgroundImage: `url('${
+                        userInfo?.profileImage ??
+                        'https://playentry.org/img/DefaultCardUserThmb.svg'
+                      }')`,
                     }}
                   />
                 ) : (
@@ -438,9 +467,12 @@ const User: React.FC = () => {
                   });
 
                   return events.sort((a, b) => Number(a[0]) - Number(b[0]));
-                })().map((event) => {
+                })().map((event, key) => {
                   return (
-                    <div className='grid [grid-template-columns:_6rem_1fr] gap-x-6 xs:gap-x-8 sm:gap-x-12'>
+                    <div
+                      className='grid [grid-template-columns:_6rem_1fr] gap-x-6 xs:gap-x-8 sm:gap-x-12'
+                      key={key}
+                    >
                       {event[3] ? (
                         <span
                           className={`font-semibold text-lg text-${event[3]} leading-6 text-right`}
@@ -467,12 +499,12 @@ const User: React.FC = () => {
                           } leading-6`}
                         >
                           {event[2].split('%%').map((msg, index, arr) => (
-                            <>
+                            <React.Fragment key={index}>
                               <span className={`text-${event[3]}`}>{msg}</span>
                               <span className={`text-${event[3]}`}>
                                 {index !== arr.length - 1 && event[1][index]}
                               </span>
-                            </>
+                            </React.Fragment>
                           ))}
                         </span>
                       ) : (
@@ -484,14 +516,14 @@ const User: React.FC = () => {
                           } leading-6`}
                         >
                           {event[2].split('%%').map((msg, index, arr) => (
-                            <>
+                            <React.Fragment key={index}>
                               <span className='text-slate-400/60 dark:text-slate-600/60'>
                                 {msg}
                               </span>
                               <span className='text-slate-400 dark:text-slate-600'>
                                 {index !== arr.length - 1 && event[1][index]}
                               </span>
-                            </>
+                            </React.Fragment>
                           ))}
                         </span>
                       )}
