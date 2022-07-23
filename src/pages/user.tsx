@@ -24,20 +24,22 @@ const User: React.FC = () => {
       .then((res) => res.json())
       .then((getUserInfo: Result<UserInfo>) => {
         if (!getUserInfo.success) {
-          if (getUserInfo.error === 'notfound') {
+          if (
+            getUserInfo.error === 'notfound' ||
+            getUserInfo.error.includes('Error: undefined')
+          ) {
             alert('존재하지 않는 유저입니다.');
             return (location.href = '/');
           }
-          return alert(
-            `${getUserInfo.error.name}: ${getUserInfo.error.message}`
-          );
+          return alert(getUserInfo.error);
         }
         setUserInfo(getUserInfo.data);
 
-        if (!getUserInfo.data.profileImage) return;
-        const profileImage = new Image();
-        profileImage.onload = () => setProfileImageLoaded(true);
-        profileImage.src = getUserInfo.data.profileImage;
+        if (getUserInfo.data.profileImage) {
+          const profileImage = new Image();
+          profileImage.onload = () => setProfileImageLoaded(true);
+          profileImage.src = getUserInfo.data.profileImage;
+        }
 
         const thumbnailImagesLoadedTmp = [false, false, false];
 
@@ -103,10 +105,7 @@ const User: React.FC = () => {
     fetch(`/api/user/getBookmarks/${params.username}`)
       .then((res) => res.json())
       .then((getBookmarks: Result<number>) => {
-        if (!getBookmarks.success)
-          return alert(
-            `${getBookmarks.error.name}: ${getBookmarks.error.message}`
-          );
+        if (!getBookmarks.success) return setBookmarks(-1);
 
         setBookmarks(getBookmarks.data);
       })
@@ -342,7 +341,7 @@ const User: React.FC = () => {
                 </span>
                 {bookmarks ? (
                   <span className='font-bold text-xl text-amber-500 leading-6 mt-1'>
-                    {bookmarks.toLocaleString()}
+                    {bookmarks === -1 ? '에러' : bookmarks.toLocaleString()}
                   </span>
                 ) : (
                   <Skeleton className='h-6 w-12' />
